@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="font-sans bg-gray-50">
+    <!-- Purchase Confirmation Modal -->
+    <div
+      id="purchaseModal"
+      class="hidden fixed inset-0 z-1000 flex items-center justify-center bg-black/50"
+    >
+      <div
+        class="bg-white p-8 rounded-2xl max-w-96 w-11/12 text-center shadow-2xl"
+      >
+        <div
+          class="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl"
+          id="modalItemIcon"
+        >
+          <i class="fas fa-user"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Confirm Purchase</h3>
+        <p class="text-gray-600 mb-4">Do you want to purchase this item?</p>
+        <div
+          class="text-xl font-semibold text-violet mb-6 flex items-center justify-center gap-2"
+        >
+          <div
+            class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+          >
+            💰
+          </div>
+          <span id="modalItemPrice">50</span>
+        </div>
+        <div id="equipOption" class="hidden mt-4 p-4 bg-gray-100 rounded-xl">
+          <label
+            class="flex items-center justify-center gap-2 cursor-pointer font-medium text-gray-700"
+          >
+            <input
+              type="checkbox"
+              id="equipCheckbox"
+              checked
+              class="w-4.5 h-4.5 cursor-pointer"
+            />
+            <span>Equip this item after purchase</span>
+          </label>
+        </div>
+        <div class="flex gap-4 justify-center mt-6">
+          <button
+            class="px-8 py-3 rounded-xl font-semibold cursor-pointer transition bg-gray-200 text-gray-700 hover:bg-gray-300"
+            onclick="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-8 py-3 rounded-xl font-semibold cursor-pointer transition bg-violet text-white hover:bg-violet/90"
+            onclick="confirmPurchase()"
+          >
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentCoins = 270;
+      let currentItem = null;
+      let equippedAvatar = null;
+
+      function updateCoinsDisplay() {
+        document.querySelectorAll(".coins-display span").forEach((el) => {
+          el.textContent = currentCoins;
+        });
+      }
+
+      function equipItem(itemCard) {
+        document.querySelectorAll(".product-card.equipped").forEach((card) => {
+          card.classList.remove("equipped");
+          card.classList.add("owned");
+          const priceSpan = card.querySelector(".price-badge span");
+          priceSpan.textContent = "";
+        });
+
+        itemCard.classList.remove("owned");
+        itemCard.classList.add("equipped");
+        const priceSpan = itemCard.querySelector(".price-badge span");
+        priceSpan.textContent = "";
+        equippedAvatar = itemCard;
+
+        const avatarIcon = itemCard.querySelector(".product-icon").innerHTML;
+        document.querySelector(".avatar-circle").innerHTML = avatarIcon;
+      }
+
+      function openPurchaseModal(itemCard, itemIcon, itemPrice) {
+        if (itemCard.classList.contains("locked")) {
+          return;
+        }
+
+        if (
+          itemCard.classList.contains("owned") ||
+          itemCard.classList.contains("equipped")
+        ) {
+          equipItem(itemCard);
+          return;
+        }
+
+        currentItem = {
+          card: itemCard,
+          icon: itemIcon,
+          price: itemPrice,
+        };
+
+        document.getElementById("modalItemIcon").innerHTML = itemIcon;
+        document.getElementById("modalItemPrice").textContent = itemPrice;
+
+        document.getElementById("equipOption").style.display = "block";
+        document.getElementById("equipCheckbox").checked = true;
+
+        document.getElementById("purchaseModal").classList.add("active");
+      }
+
+      function closeModal() {
+        document.getElementById("purchaseModal").classList.remove("active");
+        currentItem = null;
+      }
+
+      function confirmPurchase() {
+        if (!currentItem) return;
+
+        const itemPrice = currentItem.price;
+        const shouldEquip = document.getElementById("equipCheckbox").checked;
+
+        if (currentCoins >= itemPrice) {
+          currentCoins -= itemPrice;
+          updateCoinsDisplay();
+
+          currentItem.card.classList.add("owned");
+          const priceSpan = currentItem.card.querySelector(".price-badge span");
+          priceSpan.textContent = "";
+
+          if (shouldEquip) {
+            equipItem(currentItem.card);
+          }
+
+          closeModal();
+        } else {
+          alert("Not enough coins!");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const firstAvatar = document.querySelector(
+          ".product-card:not(.locked)"
+        );
+        if (firstAvatar) {
+          firstAvatar.classList.add("equipped");
+          const priceSpan = firstAvatar.querySelector(".price-badge span");
+          priceSpan.textContent = "";
+          equippedAvatar = firstAvatar;
+
+          const avatarIcon =
+            firstAvatar.querySelector(".product-icon").innerHTML;
+          document.querySelector(".avatar-circle").innerHTML = avatarIcon;
+        }
+
+        const productCards = document.querySelectorAll(
+          ".product-card:not(.locked)"
+        );
+
+        productCards.forEach((card) => {
+          card.addEventListener("click", function () {
+            const iconElement = this.querySelector(".product-icon").innerHTML;
+            const priceText =
+              this.querySelector(".price-badge span").textContent;
+            const price = parseInt(priceText) || 0;
+
+            openPurchaseModal(this, iconElement, price);
+          });
+        });
+      });
+
+      document
+        .getElementById("purchaseModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeModal();
+          }
+        });
+    </script>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+      <nav
+        class="container mx-auto px-6 py-4 flex items-center justify-between"
+      >
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+          <img src="logo.png" alt="Logo" class="h-12 w-auto object-contain" />
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="flex items-center space-x-2">
+          <a
+            href="index.html"
+            class="px-5 py-2.5 text-gray-700 hover:text-violet hover:bg-violet/5 rounded-lg transition flex items-center space-x-2 font-medium"
+          >
+            <i class="fas fa-home"></i>
+            <span>Accueil</span>
+          </a>
+          <a
+            href="missionsandchallenges.html"
+            class="px-5 py-2.5 text-gray-700 hover:text-violet hover:bg-violet/5 rounded-lg transition flex items-center space-x-2 font-medium"
+          >
+            <i class="fas fa-bullseye"></i>
+            <span>Missions</span>
+          </a>
+          <a
+            href="profile.html"
+            class="px-5 py-2.5 text-gray-700 hover:text-violet hover:bg-violet/5 rounded-lg transition flex items-center space-x-2 font-medium"
+          >
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </a>
+          <a
+            href="badges.html"
+            class="px-5 py-2.5 text-gray-700 hover:text-violet hover:bg-violet/5 rounded-lg transition flex items-center space-x-2 font-medium"
+          >
+            <i class="fas fa-trophy"></i>
+            <span>Badges</span>
+          </a>
+          <a
+            href="Calendar.html"
+            class="px-5 py-2.5 text-gray-700 hover:text-violet hover:bg-violet/5 rounded-lg transition flex items-center space-x-2 font-medium"
+          >
+            <i class="fas fa-calendar"></i>
+            <span>Calendar</span>
+          </a>
+          <a
+            href="shop.html"
+            class="px-5 py-2.5 text-violet bg-violet/10 rounded-lg transition flex items-center space-x-2 font-medium"
+          >
+            <i class="fas fa-shopping-cart"></i>
+            <span>Shop</span>
+          </a>
+          <a
+            href="CreateChallenge.html"
+            class="px-5 py-2.5 text-gray-700 hover:text-violet hover:bg-violet/5 rounded-lg transition flex items-center space-x-2 font-medium"
+          >
+            <i class="fas fa-plus-circle"></i>
+            <span>Create Challenge</span>
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8 max-w-6xl">
+      <!-- Category Tabs -->
+      <div
+        class="flex items-center justify-center mb-8 bg-white p-4 rounded-2xl shadow-sm relative"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            class="px-6 py-3 bg-violet text-white rounded-2xl font-medium cursor-pointer transition hover:bg-violet/90"
+          >
+            All
+          </button>
+          <button
+            class="px-6 py-3 bg-purple-200 text-violet rounded-2xl font-medium cursor-pointer transition hover:bg-violet hover:text-white"
+          >
+            Banners
+          </button>
+          <button
+            class="px-6 py-3 bg-purple-200 text-violet rounded-2xl font-medium cursor-pointer transition hover:bg-violet hover:text-white"
+          >
+            Avatar
+          </button>
+          <button
+            class="px-6 py-3 bg-purple-200 text-violet rounded-2xl font-medium cursor-pointer transition hover:bg-violet hover:text-white"
+          >
+            Frame
+          </button>
+          <button
+            class="px-6 py-3 bg-purple-200 text-violet rounded-2xl font-medium cursor-pointer transition hover:bg-violet hover:text-white"
+          >
+            Theme
+          </button>
+          <button
+            class="px-6 py-3 bg-purple-200 text-violet rounded-2xl font-medium cursor-pointer transition hover:bg-violet hover:text-white"
+          >
+            Hair
+          </button>
+          <button
+            class="px-6 py-3 bg-purple-200 text-violet rounded-2xl font-medium cursor-pointer transition hover:bg-violet hover:text-white"
+          >
+            Outfit
+          </button>
+        </div>
+        <div
+          class="bg-gradient-to-r from-gray-900 to-gray-800 text-white px-6 py-3 rounded-3xl absolute right-4 flex items-center gap-2 font-semibold"
+        >
+          <div
+            class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+          >
+            💰
+          </div>
+          <span>270</span>
+        </div>
+      </div>
+
+      <!-- Avatar Customization Card -->
+      <div class="flex justify-center mb-12">
+        <div
+          class="bg-gradient-to-br from-purple-200 to-indigo-200 rounded-3xl p-8 inline-flex items-center gap-6"
+        >
+          <div class="flex flex-col gap-3">
+            <div
+              class="bg-white px-6 py-4 rounded-2xl font-medium text-gray-900 cursor-pointer transition hover:bg-gray-100"
+            >
+              Hair
+            </div>
+            <div
+              class="bg-white px-6 py-4 rounded-2xl font-medium text-gray-900 cursor-pointer transition hover:bg-gray-100"
+            >
+              Banner
+            </div>
+          </div>
+          <div
+            class="w-32 h-32 bg-white rounded-full flex items-center justify-center overflow-hidden"
+          >
+            <i class="fas fa-user text-7xl text-gray-700"></i>
+          </div>
+          <div class="flex flex-col gap-3">
+            <div
+              class="bg-white px-6 py-4 rounded-2xl font-medium text-gray-900 cursor-pointer transition hover:bg-gray-100"
+            >
+              Avatar
+            </div>
+            <div
+              class="bg-white px-6 py-4 rounded-2xl font-medium text-gray-900 cursor-pointer transition hover:bg-gray-100"
+            >
+              Frame
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter and Search -->
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-semibold text-gray-900 mb-0 text-base">Avatars :</h3>
+        <div class="flex items-center gap-3">
+          <button
+            class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-300 rounded-lg bg-white cursor-pointer hover:bg-gray-50 transition"
+          >
+            <span>Filter</span>
+            <i class="fas fa-chevron-down text-xs"></i>
+          </button>
+          <div class="relative">
+            <i
+              class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+            ></i>
+            <input
+              type="text"
+              placeholder="Search"
+              class="pl-10 pr-6 py-2.5 border-2 border-gray-300 rounded-xl w-80 text-sm focus:outline-none focus:border-violet"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Avatars Grid -->
+      <div class="grid grid-cols-6 gap-6 mb-12">
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>50</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-user"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>50</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-user-astronaut"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>50</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-user-ninja"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>50</span>
+          </div>
+        </div>
+
+        <div
+          class="opacity-60 bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center cursor-not-allowed relative"
+        >
+          <div
+            class="absolute inset-0 flex items-center justify-center rounded-3xl"
+          >
+            <div
+              class="bg-gray-900/90 text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap"
+            >
+              Lvl 15 Required
+            </div>
+          </div>
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl grayscale"
+          >
+            <i class="fas fa-user-graduate"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2 opacity-50"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>50</span>
+          </div>
+        </div>
+
+        <div
+          class="opacity-60 bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center cursor-not-allowed relative"
+        >
+          <div
+            class="absolute inset-0 flex items-center justify-center rounded-3xl"
+          >
+            <div
+              class="bg-gray-900/90 text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap"
+            >
+              Lvl 15 Required
+            </div>
+          </div>
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl grayscale"
+          >
+            <i class="fas fa-user-secret"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2 opacity-50"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>50</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wearables Section -->
+      <h3 class="font-semibold text-gray-900 mb-4 text-base">Wearables :</h3>
+      <div class="grid grid-cols-6 gap-6 mb-12">
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-headphones"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>75</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-hat-cowboy"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>75</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-tshirt"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>75</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center transition hover:border-violet hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+        >
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl"
+          >
+            <i class="fas fa-user-ninja"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>75</span>
+          </div>
+        </div>
+
+        <div
+          class="opacity-60 bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center cursor-not-allowed relative"
+        >
+          <div
+            class="absolute inset-0 flex items-center justify-center rounded-3xl"
+          >
+            <div
+              class="bg-gray-900/90 text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap"
+            >
+              Lvl 15 Required
+            </div>
+          </div>
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl grayscale"
+          >
+            <i class="fas fa-vest"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2 opacity-50"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>75</span>
+          </div>
+        </div>
+
+        <div
+          class="opacity-60 bg-gray-100 border-4 border-purple-200 rounded-3xl p-6 text-center cursor-not-allowed relative"
+        >
+          <div
+            class="absolute inset-0 flex items-center justify-center rounded-3xl"
+          >
+            <div
+              class="bg-gray-900/90 text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap"
+            >
+              Lvl 15 Required
+            </div>
+          </div>
+          <div
+            class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl grayscale"
+          >
+            <i class="fas fa-vest-patches"></i>
+          </div>
+          <div
+            class="bg-gradient-to-r from-violet to-purple-600 text-white px-4 py-2 rounded-2xl font-semibold inline-flex items-center gap-2 opacity-50"
+          >
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-sm"
+            >
+              💰
+            </div>
+            <span>75</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+      <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <h4 class="font-bold mb-4">Design Column</h4>
+            <p class="text-sm text-gray-400 mb-2">Fonctionnalite</p>
+            <p class="text-sm text-gray-400">A'propos/Forum</p>
+          </div>
+          <div>
+            <h4 class="font-bold mb-4">Pages</h4>
+            <p class="text-sm text-gray-400 mb-2">Accueil</p>
+            <p class="text-sm text-gray-400 mb-2">Forum</p>
+            <p class="text-sm text-gray-400">Docs</p>
+          </div>
+          <div>
+            <h4 class="font-bold mb-4">Design Column</h4>
+            <p class="text-sm text-gray-400 mb-2">Portfolio</p>
+            <p class="text-sm text-gray-400 mb-2">Agency</p>
+            <p class="text-sm text-gray-400">Webflix</p>
+          </div>
+          <div>
+            <h4 class="font-bold mb-4">Suivez-nous</h4>
+            <div class="flex space-x-4">
+              <a href="#" class="text-gray-400 hover:text-white"
+                ><i class="fab fa-facebook"></i
+              ></a>
+              <a href="#" class="text-gray-400 hover:text-white"
+                ><i class="fab fa-twitter"></i
+              ></a>
+              <a href="#" class="text-gray-400 hover:text-white"
+                ><i class="fab fa-instagram"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <div
+          class="border-t border-gray-800 pt-8 flex justify-between items-center text-sm text-gray-400"
+        >
+          <p>© 2025 Webflow Éducation Services. Tous droits réservés</p>
+          <div class="flex space-x-4">
+            <a href="#" class="hover:text-white">Confidentialité</a>
+            <a href="#" class="hover:text-white">Conditions</a>
+            <a href="#" class="hover:text-white">Sitemap</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
