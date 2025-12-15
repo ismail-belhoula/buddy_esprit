@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questions - Design System</title>
+    <title>Questions - Répondre aux questions</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav class="bg-white shadow-sm px-6 py-3">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
             <div class="flex items-center space-x-8">
                 <div class="flex items-center space-x-2">
-                   <!-- Logo -->
+                              <!-- Logo -->
         <div class="flex items-center space-x-3">
           <img src="logo.png" alt="Logo" class="h-12 w-auto object-contain" />
         </div>
-                   
                 </div>
-                <div class="relative">
+                   <div class="relative">
                      <div class="relative">
                     <input type="text" placeholder="Rechercher" onclick="window.location.href='recherche.html'" class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-64 cursor-pointer">
                     <i class="fas fa-search absolute left-3 top-3 text-gray-400 pointer-events-none"></i>
@@ -50,53 +49,82 @@
     </nav>
 
     <!-- Hero Section -->
-    <div class="bg-gradient-to-br from-purple-600 to-purple-500 text-white text-center py-24">
+    <div class="bg-gradient-to-br from-purple-600 to-purple-500 text-white text-center py-20">
         <h1 class="text-5xl font-bold mb-4">Questions</h1>
-        <p class="text-2xl text-purple-100">Poser une question</p>
+        <p class="text-2xl text-purple-100">Répondre aux questions</p>
     </div>
 
-    <!-- Form Section -->
-    <div class="max-w-2xl mx-auto py-12 px-6">
-        <div class="bg-white rounded-xl shadow-lg p-8">
-            <div class="mb-6">
-                <label class="block text-gray-700 font-medium mb-2">Titre</label>
-                <input type="text" placeholder="Titre de la question" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-6">
+        <div class="flex justify-between items-start gap-6">
+            <!-- Left Section -->
+            <div class="flex-1">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-600 mb-2">Aperçu de la question</h2>
+                    <h3 class="text-3xl font-bold text-gray-800">Text de la question</h3>
+                </div>
+
+                <!-- Question Card -->
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Titre de question</h2>
+                    <p class="text-gray-500 mb-6">text de la question</p>
+                    
+                    <div class="flex gap-3 mb-8">
+                        <button class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition flex items-center space-x-2 text-sm">
+                            <i class="fas fa-tag"></i>
+                            <span>TAG1</span>
+                        </button>
+                        <button class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition flex items-center space-x-2 text-sm">
+                            <i class="fas fa-tag"></i>
+                            <span>TAG2</span>
+                        </button>
+                        <button class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition flex items-center space-x-2 text-sm">
+                            <i class="fas fa-tag"></i>
+                            <span>TAG3</span>
+                        </button>
+                    </div>
+
+                    <hr class="my-6 border-gray-200">
+
+                    <!-- Response Section -->
+                    <div class="flex items-start gap-4">
+                        <div class="flex flex-col items-center gap-2">
+                            <button class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100">
+                                <i class="fas fa-chevron-up text-gray-600"></i>
+                            </button>
+                            <span class="text-lg font-semibold text-gray-700">12</span>
+                            <button class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100">
+                                <i class="fas fa-chevron-down text-gray-600"></i>
+                            </button>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-gray-700 font-medium mb-1">Texte de la reponse</p>
+                            <p class="text-gray-500 text-sm">commentaire</p>
+                        </div>
+                        <button class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                            Répondre à la question
+                        </button>
+                    </div>
+
+                    <!-- Add Response Button -->
+                    <button class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition font-medium mt-6 flex items-center justify-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>RÉPONDRE</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-gray-700 font-medium mb-2">Description</label>
-                <textarea rows="6" placeholder="Description de la question" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
-            </div>
-
-            <div class="flex justify-center space-x-4 mb-6">
-                <button class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition flex items-center space-x-2">
-                    <i class="fas fa-tag"></i>
-                    <span>TAG1</span>
-                </button>
-                <button class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition flex items-center space-x-2">
-                    <i class="fas fa-tag"></i>
-                    <span>TAG2</span>
-                </button>
-                <button class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition flex items-center space-x-2">
-                    <i class="fas fa-tag"></i>
-                    <span>TAG3</span>
+            <!-- Right Section - CTA Button -->
+            <div class="w-72">
+                <button class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition font-medium shadow-lg">
+                    Poser une question
                 </button>
             </div>
-
-            <button class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition font-medium mb-3 flex items-center justify-center space-x-2">
-                <i class="fas fa-plus"></i>
-                <span>AJOUTER UN TAG</span>
-            </button>
-
-            <button class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition font-medium flex items-center justify-center space-x-2">
-                <i class="fas fa-paper-plane"></i>
-                <span>Publier la question</span>
-            </button>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-300 py-12">
+    <footer class="bg-gray-900 text-gray-300 py-12 mt-16">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-4 gap-8 mb-8">
                 <div>
